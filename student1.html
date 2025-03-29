@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student View</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background-color: #f2f2f2; /* Light gray background */
+    }
+
+    .book-container {
+      display: inline-block;
+      margin: 10px; /* Add some margin between book containers */
+    }
+
+    .book-details {
+      border: 1px solid #ccc;
+      padding: 10px;
+      background-color: #fff; /* White background */
+      max-width: 200px; /* Limit the width of the book details */
+    }
+
+    .book-details p {
+      margin: 5px 0;
+    }
+
+    form {
+      margin-bottom: 20px;
+    }
+
+    input[type="text"], button {
+      padding: 8px 12px;
+      margin: 5px 0;
+      border: 1px solid #ccc;
+      border-radius: 3px;
+    }
+
+    input[type="text"]:focus, button:focus {
+      outline: none;
+      border-color: #12e0c5; /* Turquoise focus color */
+    }
+
+    button {
+      background-color: #12e0c5; /* Turquoise button color */
+      color: #fff; /* White text color */
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #0bb9a5; /* Darker turquoise color on hover */
+    }
+
+    .suggestion {
+      cursor: pointer;
+    }
+
+    .nav {
+      background:transparent; /* Dark background color */
+      color: #181616; /* White text color */
+      padding: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+    }
+
+    .nav h1 {
+      margin: 0;
+    }
+
+    .nav .logo {
+      display: flex;
+      align-items: center;
+    }
+
+    .nav .logo img {
+      width: 40px;
+      height: 40px;
+      margin-right: 10px;
+      cursor: pointer; /* Add cursor pointer to indicate it's clickable */
+    }
+
+    .nav .cart-logo img {
+      width: 40px;
+      height: 40px;
+    }
+    
+  </style>
+</head>
+<body>
+  <div class="nav">
+    <div class="logo">
+      <img src="logo.png" alt="Logo" onclick="confirmRedirect()"> <!-- Trigger confirmation popup when clicked -->
+      <h1>Library Catalog</h1>
+    </div>
+    <div class="cart-logo">
+      <img src="cart.png" alt="Cart Icon"> <!-- Replace 'cart.png' with your cart icon image path -->
+      <span id="cartIcon">0</span> <!-- This will display the number of books in the cart -->
+    </div>
+  </div>
+
+  <div id="searchContainer">
+    <!-- Search form -->
+    <form id="searchForm">
+      <input type="text" id="titleQuery" placeholder="Search by Title">
+      <input type="text" id="authorQuery" placeholder="Search by Author">
+      <input type="text" id="isbnQuery" placeholder="Search by ISBN">
+      <input type="text" id="genreQuery" placeholder="Search by Genre">
+      <button type="submit">Search</button>
+    </form>
+    <!-- Suggestions container -->
+    <div id="suggestions"></div>
+  </div>
+
+  <div id="catalog">
+    <!-- Display book details here -->
+  </div>
+
+  <script>
+    // Redirect with confirmation function
+    function confirmRedirect() {
+      if (confirm("Are you sure you want to leave this page?")) {
+        window.location.href = "index.html"; // Redirect to the desired page
+      }
+    }
+
+    // Dummy book data for demonstration
+    let bookCatalog = [
+      { title: "Book Title 1", author: "Author 1", isbn: "1234567890", genre: "Fiction", imageURL: "book1.jpg" },
+      { title: "Book Title 2", author: "Author 2", isbn: "2345678901", genre: "Non-fiction", imageURL: "book2.jpg" }
+    ];
+
+    // Display the book catalog
+    const catalogContainer = document.getElementById("catalog");
+
+    function displayBookCatalog() {
+      catalogContainer.innerHTML = ""; // Clear the catalog container
+      bookCatalog.forEach(book => {
+        const bookContainer = document.createElement("div");
+        bookContainer.className = "book-container";
+        bookContainer.innerHTML = `
+          <div class="book-details">
+            <img src="${book.imageURL}" alt="${book.title}" style="width: 100%; height: auto;">
+            <p>Title: ${book.title}</p>
+            <p>Author: ${book.author}</p>
+            <p>ISBN: ${book.isbn}</p>
+            <p>Genre: ${book.genre}</p>
+            <button onclick="addToCart('${book.title}')">Add to Cart</button>
+          </div>
+        `;
+        catalogContainer.appendChild(bookContainer);
+      });
+    }
+
+    // Add book to the cart
+    function addToCart(bookTitle) {
+      let cartCount = parseInt(document.getElementById("cartIcon").textContent);
+      document.getElementById("cartIcon").textContent = cartCount + 1;
+      alert(bookTitle + " has been added to your cart!");
+    }
+
+    // Display the initial book catalog
+    displayBookCatalog();
+
+    // Search functionality
+    const searchForm = document.getElementById("searchForm");
+
+    searchForm.addEventListener("submit", function(event) {
+      event.preventDefault(); // Prevent form submission
+
+      const titleQuery = document.getElementById("titleQuery").value.toLowerCase();
+      const authorQuery = document.getElementById("authorQuery").value.toLowerCase();
+      const isbnQuery = document.getElementById("isbnQuery").value.toLowerCase();
+      const genreQuery = document.getElementById("genreQuery").value.toLowerCase();
+
+      const filteredBooks = bookCatalog.filter(book => {
+        return (
+          book.title.toLowerCase().includes(titleQuery) &&
+          book.author.toLowerCase().includes(authorQuery) &&
+          book.isbn.toLowerCase().includes(isbnQuery) &&
+          book.genre.toLowerCase().includes(genreQuery)
+        );
+      });
+
+      displayFilteredBooks(filteredBooks);
+    });
+
+    function displayFilteredBooks(books) {
+      catalogContainer.innerHTML = ""; // Clear the catalog container
+      books.forEach(book => {
+        const bookContainer = document.createElement("div");
+        bookContainer.className = "book-container";
+        bookContainer.innerHTML = `
+          <div class="book-details">
+            <img src="${book.imageURL}" alt="${book.title}" style="width: 100%; height: auto;">
+            <p>Title: ${book.title}</p>
+            <p>Author: ${book.author}</p>
+            <p>ISBN: ${book.isbn}</p>
+            <p>Genre: ${book.genre}</p>
+            <button onclick="addToCart('${book.title}')">Add to Cart</button>
+          </div>
+        `;
+        catalogContainer.appendChild(bookContainer);
+      });
+    }
+  </script>
+</body>
+</html>

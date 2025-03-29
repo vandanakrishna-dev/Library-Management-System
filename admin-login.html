@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Login</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      background-image: url('adb.jpg'); /* Replace 'background.jpg' with your image path */
+      background-size: cover;
+      background-position: center;
+    }
+
+    .login-container {
+      border: 1px solid #ccc;
+      padding: 20px;
+      background-color: #fff;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      border-radius: 5px;
+    }
+
+    input[type="text"], input[type="password"], button {
+      padding: 8px 12px;
+      margin: 5px 0;
+      border: 1px solid #ccc;
+      border-radius: 3px;
+      display: block;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    input[type="text"]:focus, input[type="password"]:focus, button:focus {
+      outline: none;
+      border-color: #12e0c5;
+    }
+
+    button {
+      background-color: #12e0c5;
+      color: #fff;
+      cursor: pointer;
+      display: block;
+      width: fit-content;
+      margin: 10px auto 0 auto;
+    }
+
+    button:hover {
+      background-color: #0bb9a5;
+    }
+  </style>
+</head>
+<body>
+  <div class="login-container">
+    <h2>Admin Login</h2>
+    <form id="loginForm">
+      <input type="text" id="username" placeholder="Username" required><br>
+      <input type="password" id="password" placeholder="Password" required><br>
+      <button type="submit">Login</button>
+    </form>
+  </div>
+
+  <script>
+    const loginForm = document.getElementById("loginForm");
+
+    loginForm.addEventListener("submit", function(event) {
+      event.preventDefault();
+
+      const username = document.getElementById("username").value;
+      const password = document.getElementById("password").value;
+
+      // Check for hardcoded credentials
+      if (username === "admin" && password === "admin123") {
+        window.location.href = "admin.html";
+      } else {
+        alert("Invalid username or password");
+      }
+    });
+  </script>
+</body>
+</html>

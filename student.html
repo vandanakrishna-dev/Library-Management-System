@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student View</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      /* background-image: url('slb.jpg'); */
+      background-size: cover;
+      background-repeat: no-repeat;
+      background-attachment: fixed;
+      background-color: #f2f5f4;
+      background-blend-mode: lighten;
+      padding: 20px;
+    }
+
+    .book-container {
+      display: inline-block;
+      margin: 10px;
+    }
+
+    .book-details {
+      border: 1px solid #ccc;
+      padding: 10px;
+      background-color: #fff;
+      max-width: 200px;
+      height: 400px;
+      box-sizing: border-box;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .book-details img {
+      width: 150px; /* Fixed width */
+      height: 200px; /* Fixed height */
+      object-fit: cover; /* Maintain aspect ratio */
+    }
+
+    .book-details p {
+      margin: 5px 0;
+    }
+
+    .book-details button {
+      align-self: center;
+      background-color: #12e0c5;
+      color: white;
+      border: none;
+      padding: 10px;
+      cursor: pointer;
+    }
+
+    .book-details button:hover {
+      background-color: #45a049;
+    }
+
+    #catalog {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .nav {
+      background: transparent;
+      color: #181616;
+      padding: 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+      position: relative;
+      text-align: center;
+    }
+
+    .nav h1 {
+      margin: 0;
+    }
+
+    .nav .logo {
+      display: flex;
+      align-items: center;
+      position: absolute;
+      left: 20px;
+    }
+
+    .nav .logo img {
+      width: 70px;
+      height: 65px;
+      margin-right: 10px;
+      cursor: pointer;
+    }
+
+    .nav .cart {
+      position: absolute;
+      right: 20px;
+      display: flex;
+      align-items: center;
+    }
+
+    .nav .cart img {
+      width: 40px;
+      height: 40px;
+      margin-right: 10px;
+      cursor: pointer;
+    }
+
+    .search-container {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+
+    .search-field {
+      display: flex;
+      align-items: center;
+      margin-right: 10px;
+    }
+
+    .search-field input {
+      padding: 10px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 4px 0 0 4px;
+    }
+
+    .search-field img {
+      padding: 8px;
+      background-color: #fff;
+      border: 1px solid #ccc;
+      border-radius: 0 4px 4px 0;
+      cursor: pointer;
+      width: 23px;
+      height: 23px;
+    }
+
+    /* Modal styles */
+    .modal {
+      display: none; 
+      position: fixed; 
+      z-index: 1; 
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgb(0,0,0);
+      background-color: rgba(0,0,0,0.4);
+      padding-top: 60px;
+    }
+
+    .modal-content {
+      background-color: #fefefe;
+      margin: 5% auto;
+      padding: 20px;
+      border: 1px solid #888;
+      width: 80%;
+    }
+
+    .modal-content button {
+      display: block;
+      margin: 10px 0;
+    }
+
+    .close {
+      color: #aaa;
+      float: right;
+      font-size: 28px;
+      font-weight: bold;
+    }
+
+    .close:hover,
+    .close:focus {
+      color: black;
+      text-decoration: none;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="nav">
+    <div class="logo">
+      <img src="logo.png" alt="Logo" onclick="confirmRedirect()">
+    </div>
+    <h1>Library Catalog - Student</h1>
+    <div class="cart">
+      <img src="cart1.png" alt="Cart" onclick="showCart()">
+      <span id="borrowedBooksCount">0</span>
+    </div>
+  </div>
+
+  <div class="search-container">
+    <div class="search-field">
+      <input type="text" id="searchTitle" placeholder="Search by title">
+      <img src="search-icon.png" alt="Search" onclick="searchBooks('title')">
+    </div>
+    <div class="search-field">
+      <input type="text" id="searchAuthor" placeholder="Search by author">
+      <img src="search-icon.png" alt="Search" onclick="searchBooks('author')">
+    </div>
+    <div class="search-field">
+      <input type="text" id="searchGenre" placeholder="Search by genre">
+      <img src="search-icon.png" alt="Search" onclick="searchBooks('genre')">
+    </div>
+  </div>
+
+  <div id="catalog">
+    <!-- Display book details here -->
+  </div>
+
+  <!-- Modal for messages -->
+  <div id="messageModal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeModal()">&times;</span>
+      <p id="modalMessage"></p>
+    </div>
+  </div>
+
+  <!-- Modal for cart -->
+  <div id="cartModal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeCartModal()">&times;</span>
+      <div id="borrowedBooksList"></div>
+    </div>
+  </div>
+
+  <script>
+    const catalogContainer = document.getElementById("catalog");
+    const borrowedBooksCount = document.getElementById("borrowedBooksCount");
+    const messageModal = document.getElementById("messageModal");
+    const modalMessage = document.getElementById("modalMessage");
+    const cartModal = document.getElementById("cartModal");
+    const borrowedBooksList = document.getElementById("borrowedBooksList");
+
+    function confirmRedirect() {
+      if (confirm("Are you sure you want to leave this page?")) {
+        window.location.href = "index.html";
+      }
+    }
+
+    const getBooks = () => {
+      const books = localStorage.getItem("books");
+      return books ? JSON.parse(books) : [];
+    };
+
+    const getBorrowedBooks = () => {
+      const borrowedBooks = localStorage.getItem("borrowedBooks");
+      return borrowedBooks ? JSON.parse(borrowedBooks) : [];
+    };
+
+    const saveBorrowedBooks = (borrowedBooks) => {
+      localStorage.setItem("borrowedBooks", JSON.stringify(borrowedBooks));
+      borrowedBooksCount.textContent = borrowedBooks.length;
+    };
+
+    const displayBookCatalog = (books) => {
+      catalogContainer.innerHTML = ""; // Clear the catalog container
+      books.forEach(book => {
+        const bookContainer = document.createElement("div");
+        bookContainer.className = "book-container";
+        bookContainer.innerHTML = `
+          <div class="book-details">
+            <img src="${book.imageURL}" alt="${book.title}">
+            <p>Title: ${book.title}</p>
+            <p>Author: ${book.author}</p>
+            <p>ISBN: ${book.isbn}</p>
+            <p>Genre: ${book.genre}</p>
+            <button onclick="borrowBook('${book.isbn}')">Borrow</button>
+          </div>
+        `;
+        catalogContainer.appendChild(bookContainer);
+      });
+    };
+
+    const borrowBook = (isbn) => {
+      const books = getBooks();
+      const borrowedBooks = getBorrowedBooks();
+      const bookToBorrow = books.find(book => book.isbn === isbn);
+      
+      if (bookToBorrow && !borrowedBooks.some(book => book.isbn === isbn)) {
+        borrowedBooks.push(bookToBorrow);
+        saveBorrowedBooks(borrowedBooks);
+        showMessage(`You have borrowed the book: ${bookToBorrow.title}`);
+      } else {
+        showMessage("This book is already borrowed.");
+      }
+    };
+
+    const showCart = () => {
+      const borrowedBooks = getBorrowedBooks();
+      borrowedBooksList.innerHTML = "";
+      if (borrowedBooks.length > 0) {
+        borrowedBooks.forEach(book => {
+          const bookItem = document.createElement("div");
+          bookItem.innerHTML = `
+            <p>${book.title}</p>
+            <button onclick="returnBook('${book.isbn}')">Return</button>
+          `;
+          borrowedBooksList.appendChild(bookItem);
+        });
+      } else {
+        borrowedBooksList.innerHTML = "<p>No books borrowed.</p>";
+      }
+      cartModal.style.display = "block";
+    };
+
+    const returnBook = (isbn) => {
+      let borrowedBooks = getBorrowedBooks();
+      borrowedBooks = borrowedBooks.filter(book => book.isbn !== isbn);
+      saveBorrowedBooks(borrowedBooks);
+      showMessage("The book has been returned.");
+      showCart();
+    };
+
+    const showMessage = (message) => {
+      modalMessage.textContent = message;
+      messageModal.style.display = "block";
+    };
+
+    const closeModal = () => {
+      messageModal.style.display = "none";
+    };
+
+    const closeCartModal = () => {
+      cartModal.style.display = "none";
+    };
+
+    window.onclick = function(event) {
+      if (event.target === messageModal) {
+        messageModal.style.display = "none";
+      }
+      if (event.target === cartModal) {
+        cartModal.style.display = "none";
+      }
+    };
+
+    const searchBooks = (type) => {
+      const searchTerm = document.getElementById(`search${type.charAt(0).toUpperCase() + type.slice(1)}`).value.toLowerCase();
+      const books = getBooks();
+      const filteredBooks = books.filter(book => book[type].toLowerCase().includes(searchTerm));
+      displayBookCatalog(filteredBooks);
+    };
+
+    displayBookCatalog(getBooks());
+    borrowedBooksCount.textContent = getBorrowedBooks().length;
+  </script>
+</body>
+</html>
